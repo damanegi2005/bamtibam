@@ -1,0 +1,132 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--bg-secondary);
+  border: 2px solid var(--accent-neon);
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-card h2 {
+  color: var(--accent-neon);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  border-bottom: 2px solid var(--accent-neon);
+  padding-bottom: 10px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 2px solid var(--accent-neon);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus {
+  outline: none;
+}
+
+.form-group input.error {
+  border-color: #ff4757;
+  box-shadow: 0 0 8px #ff4757;
+}
+
+.error-message {
+  color: #ff4757;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px solid var(--accent-neon);
+}
+
+.auth-footer p {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.simple-link {
+  background: none;
+  border: none;
+  color: var(--accent-neon);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.simple-link:hover {
+  color: var(--text-primary);
+}
+
+.success-message {
+  color: var(--accent-neon);
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+}
+
+/* 체크박스 스타일 */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-neon);
+}
+
+.checkbox-group label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  
+  .auth-card h2 {
+    font-size: 24px;
+  }
+}
