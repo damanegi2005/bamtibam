@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './Auth.css'
+import { api } from '../lib/api'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -17,7 +18,7 @@ const Login = () => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     // 기본 입력값 확인
@@ -25,40 +26,18 @@ const Login = () => {
       alert('이메일과 비밀번호를 입력하세요!')
       return
     }
-
-    // 1) 하드코딩된 테스트 계정 지원
-    if (formData.email === 'admin@devshop.com' && formData.password === 'admin123') {
-      const user = { email: 'admin@devshop.com', name: '관리자', isAdmin: true }
+    try {
+      const { token, user } = await api.login({ email: formData.email, password: formData.password })
+      // role → isAdmin 변환
+      const isAdmin = user?.role === 'admin' || user?.isAdmin === true
+      localStorage.setItem('authToken', token)
       localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('userInfo', JSON.stringify(user))
+      localStorage.setItem('userInfo', JSON.stringify({ ...user, isAdmin }))
       alert('로그인 성공!')
       navigate('/')
-      return
+    } catch (err) {
+      alert(err.message || '로그인 실패')
     }
-
-    if (formData.email === 'user@devshop.com' && formData.password === 'user123') {
-      const user = { email: 'user@devshop.com', name: '사용자', isAdmin: false }
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('userInfo', JSON.stringify(user))
-      alert('로그인 성공!')
-      navigate('/')
-      return
-    }
-
-    // 2) 회원가입으로 저장된 사용자 목록에서 검증
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const matched = users.find(u => u.email === formData.email && u.password === formData.password)
-
-    if (!matched) {
-      alert('이메일 또는 비밀번호가 일치하지 않습니다.')
-      return
-    }
-
-    const user = { email: matched.email, name: matched.name, isAdmin: !!matched.isAdmin }
-    localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('userInfo', JSON.stringify(user))
-    alert('로그인 성공!')
-    navigate('/')
   }
 
   return (
@@ -98,8 +77,7 @@ const Login = () => {
             회원가입: <Link to="/signup" className="simple-link">여기 클릭</Link>
           </p>
           <p style={{ fontSize: '12px', marginTop: '10px', color: 'var(--text-secondary)' }}>
-            테스트: admin@devshop.com / admin123<br/>
-            또는 아무 이메일@아무것.com / 아무비밀번호
+            서버 연동 로그인: 가입한 이메일/비밀번호를 사용하세요.
           </p>
         </div>
       </div>

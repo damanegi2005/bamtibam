@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './Auth.css'
+import { api } from '../lib/api'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -19,7 +20,7 @@ const Signup = () => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     // 입력 정리
@@ -45,21 +46,14 @@ const Signup = () => {
       return
     }
 
-    // 기존 사용자 조회 및 중복 체크
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]')
-    const duplicated = existingUsers.some(u => (u.email || '').toLowerCase() === email)
-    if (duplicated) {
-      alert('이미 가입된 이메일입니다. 로그인해 주세요.')
+    try {
+      // 백엔드 회원가입 호출 (관리자 체크는 서버 정책에 따라 무시될 수 있음)
+      await api.signup({ name, email, password, isAdmin })
+      alert('회원가입 완료! 이제 로그인해 주세요.')
       navigate('/login')
-      return
+    } catch (err) {
+      alert(err.message || '회원가입 중 오류가 발생했습니다.')
     }
-
-    const newUser = { name, email, password, isAdmin }
-    existingUsers.push(newUser)
-    localStorage.setItem('users', JSON.stringify(existingUsers))
-
-    alert('회원가입 완료! 이제 로그인해 주세요.')
-    navigate('/login')
   }
 
   return (

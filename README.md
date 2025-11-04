@@ -26,6 +26,49 @@ npm run dev
 ### 3. 브라우저에서 확인
 - http://localhost:3000 접속
 
+### 환경 변수
+프로젝트 루트에 `.env` 생성:
+```
+VITE_API_BASE_URL=http://localhost:4000
+```
+백엔드 저장소에는 `DATABASE_URL`을 설정하세요. 예시는 `env.example` 참고.
+
+### API 계약
+`docs/api-contract.md` 참고. 백엔드는 해당 스펙대로 라우트를 제공해야 프론트가 정상 동작합니다.
+
+## DB 설정(팀 온보딩용)
+
+1) Docker로 DB 실행(둘 중 하나 선택)
+```bash
+npm run db:up:postgres   # PostgreSQL 권장
+# 또는
+npm run db:up:mysql
+```
+
+2) 스키마/마이그레이션/시드 적용
+- PostgreSQL
+```bash
+cd db
+psql postgresql://bamtibam:bamtibam@localhost:5432/bamtibam -f schema.postgres.sql
+psql postgresql://bamtibam:bamtibam@localhost:5432/bamtibam -f migrations/001_add_user_block_and_posts_reviews.postgres.sql
+psql postgresql://bamtibam:bamtibam@localhost:5432/bamtibam -f seed.postgres.sql
+```
+- MySQL
+```bash
+cd db
+mysql -h127.0.0.1 -P3306 -ubamtibam -pbamtibam bamtibam < schema.mysql.sql
+mysql -h127.0.0.1 -P3306 -ubamtibam -pbamtibam bamtibam < migrations/001_add_user_block_and_posts_reviews.mysql.sql
+mysql --default-character-set=utf8mb4 -h127.0.0.1 -P3306 -ubamtibam -pbamtibam bamtibam < seed.mysql.sql
+```
+
+3) 계정(시드)
+- 관리자: admin@example.com / Password123!
+- 사용자: user@example.com / Password123!
+
+문제 해결
+- MySQL 한글 에러: `db/README.md`의 가이드를 참고하여 `utf8mb4` 적용 후 재실행
+- 스키마 불일치: `db/migrations/`와 `db/seed.*.sql`을 차례로 재적용
+
 ## 테스트 계정
 
 ### 관리자 계정

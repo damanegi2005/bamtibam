@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "db:up:postgres": "cd db && docker compose up -d postgres",
+    "db:up:mysql": "cd db && docker compose up -d mysql",
+    "db:migrate:postgres": "cd db && psql postgresql://bamtibam:bamtibam@localhost:5432/bamtibam -f migrations/001_add_user_block_and_posts_reviews.postgres.sql",
+    "db:migrate:mysql": "cd db && mysql -h127.0.0.1 -P3306 -ubamtibam -pbamtibam bamtibam < migrations/001_add_user_block_and_posts_reviews.mysql.sql",
+    "db:seed:postgres": "cd db && psql postgresql://bamtibam:bamtibam@localhost:5432/bamtibam -f seed.postgres.sql",
+    "db:seed:mysql": "cd db && mysql --default-character-set=utf8mb4 -h127.0.0.1 -P3306 -ubamtibam -pbamtibam bamtibam < seed.mysql.sql"
   },
   "dependencies": {
     "react": "^18.2.0",
