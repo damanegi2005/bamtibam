@@ -20,35 +20,45 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    // 투박한 로그인 - 검증 거의 없음
-    if (formData.email && formData.password) {
-      // 간단한 사용자 체크
-      let user = null
-      
-      if (formData.email === 'admin@devshop.com' && formData.password === 'admin123') {
-        user = { email: 'admin@devshop.com', name: '관리자', isAdmin: true }
-      } else if (formData.email === 'user@devshop.com' && formData.password === 'user123') {
-        user = { email: 'user@devshop.com', name: '사용자', isAdmin: false }
-      } else if (formData.email.includes('@') && formData.password.length > 0) {
-        // 그냥 이메일 형식이면 통과 (보안 패치 제거)
-        user = { 
-          email: formData.email, 
-          name: formData.email.split('@')[0], 
-          isAdmin: formData.email.includes('admin') 
-        }
-      }
-      
-      if (user) {
-        localStorage.setItem('isLoggedIn', 'true')
-        localStorage.setItem('userInfo', JSON.stringify(user))
-        alert('로그인 성공!')
-        navigate('/')
-      } else {
-        alert('로그인 실패!')
-      }
-    } else {
+    // 기본 입력값 확인
+    if (!(formData.email && formData.password)) {
       alert('이메일과 비밀번호를 입력하세요!')
+      return
     }
+
+    // 1) 하드코딩된 테스트 계정 지원
+    if (formData.email === 'admin@devshop.com' && formData.password === 'admin123') {
+      const user = { email: 'admin@devshop.com', name: '관리자', isAdmin: true }
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('userInfo', JSON.stringify(user))
+      alert('로그인 성공!')
+      navigate('/')
+      return
+    }
+
+    if (formData.email === 'user@devshop.com' && formData.password === 'user123') {
+      const user = { email: 'user@devshop.com', name: '사용자', isAdmin: false }
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('userInfo', JSON.stringify(user))
+      alert('로그인 성공!')
+      navigate('/')
+      return
+    }
+
+    // 2) 회원가입으로 저장된 사용자 목록에서 검증
+    const users = JSON.parse(localStorage.getItem('users') || '[]')
+    const matched = users.find(u => u.email === formData.email && u.password === formData.password)
+
+    if (!matched) {
+      alert('이메일 또는 비밀번호가 일치하지 않습니다.')
+      return
+    }
+
+    const user = { email: matched.email, name: matched.name, isAdmin: !!matched.isAdmin }
+    localStorage.setItem('isLoggedIn', 'true')
+    localStorage.setItem('userInfo', JSON.stringify(user))
+    alert('로그인 성공!')
+    navigate('/')
   }
 
   return (
