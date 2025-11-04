@@ -22,26 +22,44 @@ const Signup = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    // 투박한 회원가입 - 검증 거의 없음
-    if (formData.name && formData.email && formData.password) {
-      // 간단한 저장
-      const newUser = {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        isAdmin: formData.isAdmin
-      }
-      
-      // localStorage에 저장 (중복 체크 없음)
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]')
-      existingUsers.push(newUser)
-      localStorage.setItem('users', JSON.stringify(existingUsers))
-      
-      alert('회원가입 완료!')
-      navigate('/login')
-    } else {
+    // 입력 정리
+    const name = (formData.name || '').trim()
+    const email = (formData.email || '').trim().toLowerCase()
+    const password = (formData.password || '').trim()
+    const isAdmin = !!formData.isAdmin
+
+    // 기본 검증
+    if (!name || !email || !password) {
       alert('모든 항목을 입력하세요!')
+      return
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      alert('올바른 이메일 형식을 입력하세요.')
+      return
+    }
+
+    if (password.length < 6) {
+      alert('비밀번호는 최소 6자 이상이어야 합니다.')
+      return
+    }
+
+    // 기존 사용자 조회 및 중복 체크
+    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]')
+    const duplicated = existingUsers.some(u => (u.email || '').toLowerCase() === email)
+    if (duplicated) {
+      alert('이미 가입된 이메일입니다. 로그인해 주세요.')
+      navigate('/login')
+      return
+    }
+
+    const newUser = { name, email, password, isAdmin }
+    existingUsers.push(newUser)
+    localStorage.setItem('users', JSON.stringify(existingUsers))
+
+    alert('회원가입 완료! 이제 로그인해 주세요.')
+    navigate('/login')
   }
 
   return (
