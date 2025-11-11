@@ -10,10 +10,12 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   name VARCHAR(255) NOT NULL,
   role VARCHAR(32) NOT NULL DEFAULT 'customer',
+  is_admin TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id),
-  INDEX idx_users_role (role)
+  INDEX idx_users_role (role),
+  INDEX idx_users_is_admin (is_admin)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS categories (

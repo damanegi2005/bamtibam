@@ -34,3 +34,4 @@ INSERT INTO product_images (product_id, image_url, sort_order, created_at) VALUE
 ((SELECT id FROM products WHERE slug='macaron-set'), 'https://example.com/images/macaron.jpg', 0, '2024-01-01T00:00:00Z');
 
 
+

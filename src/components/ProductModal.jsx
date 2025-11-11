@@ -1,25 +1,58 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './ProductModal.css'
+import { api } from '../lib/api'
 
 const ProductModal = ({ product, onClose }) => {
   const [newReview, setNewReview] = useState({
     rating: 5,
     comment: ''
   })
-  const [reviews, setReviews] = useState(product.reviews || [])
+  const [reviews, setReviews] = useState([])
 
-  const handleReviewSubmit = (e) => {
+  // 서버에서 리뷰 불러오기
+  useEffect(() => {
+    if (!product?.slug) return
+    api.listProductReviews(product.slug)
+      .then((list) => {
+        // 서버 리뷰를 모달 표시용으로 변환
+        const normalized = (list || []).map(r => ({
+          id: r.id,
+          user: r.user_name || '익명',
+          rating: r.rating,
+          comment: r.content || ''
+        }))
+        setReviews(normalized)
+      })
+      .catch(() => setReviews([]))
+  }, [product?.slug])
+
+  const handleReviewSubmit = async (e) => {
     e.preventDefault()
-    if (newReview.comment.trim()) {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-      const review = {
-        id: Date.now(),
-        user: userInfo.name || '익명',
+    const comment = (newReview.comment || '').trim()
+    if (!comment) return
+    const token = localStorage.getItem('authToken') || ''
+    if (!token) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+    try {
+      await api.createReview(token, {
+        productId: product.id,
         rating: newReview.rating,
-        comment: newReview.comment.trim()
-      }
-      setReviews([...reviews, review])
+        content: comment
+      })
+      // 작성 후 즉시 목록 재조회
+      const list = await api.listProductReviews(product.slug)
+      const normalized = (list || []).map(r => ({
+        id: r.id,
+        user: r.user_name || '익명',
+        rating: r.rating,
+        comment: r.content || ''
+      }))
+      setReviews(normalized)
       setNewReview({ rating: 5, comment: '' })
+    } catch (err) {
+      alert(err?.message || '리뷰 작성 실패')
     }
   }
 
@@ -53,7 +86,7 @@ const ProductModal = ({ product, onClose }) => {
             
             <div className="product-info-large">
               <div className="price-section">
-                <span className="price">{product.price.toLocaleString()}원</span>
+                <span className="price">{(product.price_cents || product.price || 0).toLocaleString()}원</span>
               </div>
               
               <div className="rating-section">

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import ProductModal from '../components/ProductModal'
+import { api } from '../lib/api'
 import './Home.css'
 
 const Home = () => {
   const [searchParams] = useSearchParams()
   const [products, setProducts] = useState([])
-  const [filteredProducts, setFilteredProducts] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const currentCategory = searchParams.get('category') || 'ai'
 
-  // 임시 상품 데이터
+  // 임시 상품 데이터 (fallback용)
   const mockProducts = [
     {
       id: 1,
@@ -79,18 +79,39 @@ const Home = () => {
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
     setIsLoggedIn(loggedIn)
-    
-    if (loggedIn) {
-      setProducts(mockProducts)
-    }
   }, [])
 
   useEffect(() => {
-    if (products.length > 0) {
-      const filtered = products.filter(product => product.category === currentCategory)
-      setFilteredProducts(filtered)
+    const loadProducts = async () => {
+      if (!isLoggedIn) {
+        setProducts([])
+        return
+      }
+      
+      try {
+        const serverProducts = await api.listProducts(currentCategory)
+        // 서버 응답을 UI 형식에 맞게 변환
+        const normalized = serverProducts.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price_cents || 0,
+          price_cents: p.price_cents,
+          category: p.category || currentCategory,
+          image: p.image || `https://via.placeholder.com/300x200/00aa88/1e1e1e?text=${encodeURIComponent(p.name)}`,
+          description: p.description || '',
+          slug: p.slug
+        }))
+        setProducts(normalized)
+      } catch (err) {
+        console.error('상품 로드 실패:', err)
+        // Fallback to mock data
+        const filtered = mockProducts.filter(p => p.category === currentCategory)
+        setProducts(filtered)
+      }
     }
-  }, [products, currentCategory])
+    
+    loadProducts()
+  }, [currentCategory, isLoggedIn])
 
   const handleProductClick = (product) => {
     setSelectedProduct(product)
@@ -123,27 +144,22 @@ const Home = () => {
             <h2>주요 기능</h2>
             <div className="features-grid">
               <div className="feature-card">
-          
                 <h3>AI 도구</h3>
-                <p>최신 AI 서비스와 도구들들</p>
+                <p>최신 AI 서비스와 도구들</p>
               </div>
               <div className="feature-card">
-               
                 <h3>건강 관리</h3>
                 <p>개발자의 건강을 위한 다양한 제품들</p>
               </div>
               <div className="feature-card">
-                
                 <h3>전자기기</h3>
                 <p>최신 기술의 전자기기들</p>
               </div>
               <div className="feature-card">
-              
                 <h3>언어 학습</h3>
                 <p>언어 학습 도구</p>
               </div>
               <div className="feature-card">
-            
                 <h3>스트레스 관리</h3>
                 <p>힘든 개발 업무를 위한 스트레스 해소 도구.</p>
               </div>
@@ -164,34 +180,29 @@ const Home = () => {
           {currentCategory === 'language' && '📚 언어'}
           {currentCategory === 'stress' && '😌 스트레스'}
         </h2>
-        <p>{filteredProducts.length}개의 상품이 있습니다.</p>
+        <p>{products.length}개의 상품이 있습니다.</p>
       </div>
 
       <div className="products-grid">
-        {filteredProducts.map(product => (
+        {products.map(product => (
           <div 
             key={product.id} 
             className="product-card"
             onClick={() => handleProductClick(product)}
           >
             <div className="product-image">
-              <img src={product.image} alt={product.name} />
+              <img src={product.image || 'https://via.placeholder.com/300x200'} alt={product.name} />
             </div>
             <div className="product-info">
               <h3>{product.name}</h3>
-              <p className="product-price">{product.price.toLocaleString()}원</p>
+              <p className="product-price">{(product.price_cents || product.price || 0).toLocaleString()}원</p>
               <p className="product-description">{product.description}</p>
-              <div className="product-reviews">
-                <span>⭐ {product.reviews.length > 0 ? 
-                  (product.reviews.reduce((sum, review) => sum + review.rating, 0) / product.reviews.length).toFixed(1) : 
-                  '0.0'} ({product.reviews.length})</span>
-              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {products.length === 0 && (
         <div className="no-products">
           <p>이 카테고리에 상품이 없습니다.</p>
         </div>
