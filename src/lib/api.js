@@ -25,8 +25,11 @@ export const api = {
   listPosts: () => request('/posts'),
   createReview: (token, payload) => request('/reviews', { method: 'POST', body: payload, token }),
   listProductReviews: (slug) => request(`/products/${encodeURIComponent(slug)}/reviews`),
+  listProducts: (category) => request(`/products${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  getProduct: (slug) => request(`/products/${encodeURIComponent(slug)}`),
 };
 
 export default api;
+
 
 

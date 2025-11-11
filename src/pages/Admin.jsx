@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './Admin.css'
+import { api } from '../lib/api'
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('users')
@@ -17,53 +18,57 @@ const Admin = () => {
       return
     }
 
-    // 임시 데이터 로드
-    loadMockData()
+    // 실제 데이터 로드
+    loadInitialData()
   }, [])
 
-  const loadMockData = () => {
-    // 임시 사용자 데이터
-    const mockUsers = [
-      { id: 1, name: '관리자', email: 'admin@devshop.com', isAdmin: true, isBlocked: false, joinDate: '2024-01-01' },
-      { id: 2, name: '사용자', email: 'user@devshop.com', isAdmin: false, isBlocked: false, joinDate: '2024-01-15' },
-      { id: 3, name: '김개발', email: 'kim@devshop.com', isAdmin: false, isBlocked: false, joinDate: '2024-02-01' },
-      { id: 4, name: '박코딩', email: 'park@devshop.com', isAdmin: false, isBlocked: true, joinDate: '2024-02-10' },
-      { id: 5, name: '이건강', email: 'lee@devshop.com', isAdmin: false, isBlocked: false, joinDate: '2024-02-20' }
-    ]
-
-    // 임시 상품 데이터
-    const mockProducts = [
-      { id: 1, name: 'ChatGPT Plus 구독', price: 20000, category: 'ai', isActive: true },
-      { id: 2, name: '비타민 D3 2000IU', price: 25000, category: 'health', isActive: true },
-      { id: 3, name: 'MacBook Air M2', price: 1500000, category: 'electronics', isActive: true },
-      { id: 4, name: '영어 회화 마스터 코스', price: 150000, category: 'language', isActive: false }
-    ]
-
-    // 임시 리뷰 데이터
-    const mockReviews = [
-      { id: 1, productId: 1, userName: '김개발', rating: 5, comment: '정말 유용합니다!', date: '2024-03-01', isReported: false },
-      { id: 2, productId: 1, userName: '박코딩', rating: 4, comment: '가격 대비 만족합니다.', date: '2024-03-02', isReported: false },
-      { id: 3, productId: 2, userName: '이건강', rating: 5, comment: '건강이 좋아졌어요!', date: '2024-03-03', isReported: true },
-      { id: 4, productId: 3, userName: '최개발', rating: 5, comment: '성능이 정말 좋습니다!', date: '2024-03-04', isReported: false }
-    ]
-
-    // 임시 게시글 데이터
-    const mockPosts = [
-      { id: 1, title: 'AI 도구 추천', author: '김개발', category: 'ai', views: 150, isActive: true, date: '2024-03-01' },
-      { id: 2, title: '건강 관리 팁', author: '이건강', category: 'health', views: 89, isActive: true, date: '2024-03-02' },
-      { id: 3, title: '스팸 게시글', author: '스팸머', category: 'electronics', views: 5, isActive: false, date: '2024-03-03' }
-    ]
-
-    setUsers(mockUsers)
-    setProducts(mockProducts)
-    setReviews(mockReviews)
-    setPosts(mockPosts)
+  const loadInitialData = async () => {
+    try {
+      // 사용자 목록
+      const token = localStorage.getItem('authToken') || ''
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/admin/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const usersList = await res.json()
+      const normalizedUsers = (usersList || []).map(u => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        isAdmin: u.is_admin === 1,
+        isBlocked: u.is_blocked === 1,
+        joinDate: (u.created_at || '').slice(0, 10)
+      }))
+      setUsers(normalizedUsers)
+      // 상품 목록 (간단히)
+      const productsList = await api.listProducts()
+      const normalizedProducts = (productsList || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price_cents || 0,
+        category: p.category,
+        isActive: p.is_active === 1 || p.is_active === true
+      }))
+      setProducts(normalizedProducts)
+    } catch {
+      // 무시
+    }
   }
 
   const toggleUserBlock = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, isBlocked: !user.isBlocked } : user
-    ))
+    const token = localStorage.getItem('authToken') || ''
+    const user = users.find(u => u.id === userId)
+    if (!user) return
+    const endpoint = user.isBlocked ? `/users/${userId}/unblock` : `/users/${userId}/block`
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}${endpoint}`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(() => {
+        setUsers(users.map(u => u.id === userId ? { ...u, isBlocked: !u.isBlocked } : u))
+      })
+      .catch(() => {
+        alert('처리 실패했습니다.')
+      })
   }
 
   const toggleProductStatus = (productId) => {

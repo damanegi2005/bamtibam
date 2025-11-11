@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16
@@ -28,7 +26,7 @@ services:
       MYSQL_PASSWORD: bamtibam
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - '3306:3306'
+      - '3307:3306'  # 호스트 포트 3307로 변경 (로컬 MySQL과 충돌 방지)
     volumes:
       - mysqldata:/var/lib/mysql
     healthcheck:
