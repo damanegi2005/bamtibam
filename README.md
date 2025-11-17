@@ -1,11 +1,7 @@
 # BAMTIBAM- 개발자용 쇼핑몰 
 
 VS Code 스타일의 네온 테마를 적용한 React 기반 쇼핑몰 웹사이트
-<<<<<<< HEAD
-보안 거의 x
-=======
 백엔드/프론트엔드 연동된 풀스택 샘플로, 관리 기능과 기본 보안 정책(입력 검증, JWT 인증, 관리자 전용 API 등)을 포함합니다.
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 
 
 ## 기술 스택
@@ -83,12 +79,6 @@ mysql --default-character-set=utf8mb4 -h127.0.0.1 -P3306 -ubamtibam -pbamtibam b
 - **이메일**: user@devshop.com
 - **비밀번호**: user123
 
-<<<<<<< HEAD
-### 로그인 특징
-- **아무 이메일@아무것.com + 아무 비밀번호**로도 로그인 가능!
-- 보안 검증 거의 없음 (학생이 만든 것처럼)
-- 새 창 팝업으로 로그인/회원가입
-=======
 ### 보안 정책
 - 회원가입 시 이름/이메일/비밀번호 모두 유효성 검사를 통과해야 합니다.  
   - 이름: 2~30자, 한글/영문/숫자 + 공백/._-
@@ -101,7 +91,6 @@ mysql --default-character-set=utf8mb4 -h127.0.0.1 -P3306 -ubamtibam -pbamtibam b
 - 회원 목록, 상품, 리뷰, 게시글 데이터 모두 실시간으로 백엔드에서 호출
 - 사용자 차단/해제, 관리자 권한 부여/회수
 - 상품/게시글 활성화 토글, 리뷰 비활성화 등 운영 도구 제공
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 
 ## 프로젝트 구조
 

@@ -72,8 +72,6 @@
   border-top: 2px solid var(--accent-neon);
 }
 
-<<<<<<< HEAD
-=======
 .form-error {
   margin-top: 10px;
   color: #ff6b81;
@@ -108,7 +106,6 @@
   gap: 4px;
 }
 
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 .auth-footer p {
   color: var(--text-secondary);
   margin-bottom: 8px;

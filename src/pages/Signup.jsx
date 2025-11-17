@@ -3,66 +3,15 @@ import { Link, useNavigate } from 'react-router-dom'
 import './Auth.css'
 import { api } from '../lib/api'
 
-<<<<<<< HEAD
-=======
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const NAME_REGEX = /^[A-Za-z가-힣0-9][A-Za-z가-힣0-9\s._-]{1,29}$/
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{10,64}$/
 const PASSWORD_HINT = '10~64자, 대/소문자, 숫자, 특수문자 각각 1개 이상 포함'
-
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 const Signup = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-<<<<<<< HEAD
-    password: '',
-    isAdmin: false
-  })
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    // 입력 정리
-    const name = (formData.name || '').trim()
-    const email = (formData.email || '').trim().toLowerCase()
-    const password = (formData.password || '').trim()
-    const isAdmin = !!formData.isAdmin
-
-    // 기본 검증
-    if (!name || !email || !password) {
-      alert('모든 항목을 입력하세요!')
-      return
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      alert('올바른 이메일 형식을 입력하세요.')
-      return
-    }
-
-    if (password.length < 6) {
-      alert('비밀번호는 최소 6자 이상이어야 합니다.')
-      return
-    }
-
-    try {
-      // 백엔드 회원가입 호출 (관리자 체크는 서버 정책에 따라 무시될 수 있음)
-      await api.signup({ name, email, password, isAdmin })
-      alert('회원가입 완료! 이제 로그인해 주세요.')
-      navigate('/login')
-    } catch (err) {
-      alert(err.message || '회원가입 중 오류가 발생했습니다.')
-=======
     password: ''
   })
   const [error, setError] = useState('')
@@ -123,7 +72,6 @@ const Signup = () => {
       navigate('/login')
     } catch (err) {
       setError(err.message || '회원가입 중 오류가 발생했습니다.')
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     }
   }
 
@@ -165,23 +113,6 @@ const Signup = () => {
             />
           </div>
 
-<<<<<<< HEAD
-          <div className="checkbox-group">
-            <input
-              type="checkbox"
-              name="isAdmin"
-              checked={formData.isAdmin}
-              onChange={handleChange}
-            />
-            <label>관리자로 가입</label>
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-full">
-            회원가입
-          </button>
-        </form>
-
-=======
           <button type="submit" className="btn btn-primary btn-full">
             회원가입
           </button>
@@ -197,17 +128,12 @@ const Signup = () => {
           </ul>
         </div>
 
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
         <div className="auth-footer">
           <p>
             이미 계정이 있으신가요? 
             <Link to="/login" className="simple-link">로그인하기</Link>
           </p>
-<<<<<<< HEAD
-          <p>간단하게 만들어서 검증이 없어요 ㅎㅎ</p>
-=======
           <p>안전한 회원가입을 위해 필수 검증이 적용되어 있습니다.</p>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
         </div>
       </div>
     </div>

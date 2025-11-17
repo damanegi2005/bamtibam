@@ -4,12 +4,6 @@ import morgan from 'morgan'
 import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-<<<<<<< HEAD
-import pool from './db.js'
-
-dotenv.config()
-
-=======
 import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import pool from './db.js'
@@ -25,16 +19,10 @@ dotenv.config()
 const ADMIN_ROLE = 'admin'
 const CUSTOMER_ROLE = 'customer'
 
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 const app = express()
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 const JWT_SECRET = process.env.JWT_SECRET || 'devsecret_change_me'
-<<<<<<< HEAD
-
-app.use(morgan('dev'))
-app.use(express.json())
-=======
 const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12)
 
 const authLimiter = rateLimit({
@@ -53,7 +41,6 @@ app.use(
 )
 app.use(morgan('dev'))
 app.use(express.json({ limit: '1mb' }))
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 app.use(
   cors({
     origin: CLIENT_ORIGIN,
@@ -61,11 +48,6 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization']
   })
 )
-<<<<<<< HEAD
-
-function generateToken(user) {
-  const role = user.is_admin === 1 || user.role === 'admin' ? 'admin' : 'user'
-=======
 app.use(['/auth/login', '/auth/signup'], authLimiter)
 
 function resolveRole(user) {
@@ -74,7 +56,6 @@ function resolveRole(user) {
 
 function generateToken(user) {
   const role = resolveRole(user)
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   return jwt.sign(
     { sub: user.id, email: user.email, role },
     JWT_SECRET,
@@ -104,39 +85,11 @@ async function authMiddleware(req, res, next) {
 
 function adminMiddleware(req, res, next) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
-<<<<<<< HEAD
-  const isAdmin = req.user.is_admin === 1 || req.user.role === 'admin'
-=======
   const isAdmin = resolveRole(req.user) === ADMIN_ROLE
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   if (!isAdmin) return res.status(403).json({ message: 'Forbidden' })
   next()
 }
 
-<<<<<<< HEAD
-// Auth
-app.post('/auth/signup', async (req, res) => {
-  const { name, email, password } = req.body || {}
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'name, email, password are required' })
-  }
-  try {
-    console.log('↪️ /auth/signup 요청:', { name, email })
-    // Check if user exists
-    const [existing] = await pool.execute(
-      'SELECT id FROM users WHERE email = ?',
-      [email.toLowerCase()]
-    )
-    if (existing.length > 0) {
-      console.log('⚠️ 이미 존재하는 이메일:', email.toLowerCase())
-      return res.status(409).json({ message: 'User already exists' })
-    }
-    
-    const passwordHash = await bcrypt.hash(password, 10)
-    const isAdmin = req.body.isAdmin === true ? 1 : 0
-    const role = isAdmin ? 'admin' : 'customer'
-    
-=======
 async function updateUserBlockStatus(userId, isBlocked) {
   await pool.execute('UPDATE users SET is_blocked = ? WHERE id = ?', [isBlocked ? 1 : 0, userId])
 }
@@ -193,31 +146,10 @@ app.post('/auth/signup', async (req, res) => {
     const role = CUSTOMER_ROLE
     const isAdmin = 0
 
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     let result
     try {
       ;[result] = await pool.execute(
         'INSERT INTO users (name, email, password_hash, role, is_admin) VALUES (?, ?, ?, ?, ?)',
-<<<<<<< HEAD
-        [name, email.toLowerCase(), passwordHash, role, isAdmin]
-      )
-    } catch (insertErr) {
-      console.error('❌ 사용자 INSERT 실패:', insertErr?.sqlMessage || insertErr?.message || insertErr)
-      return res.status(500).json({ message: 'Failed to create user', detail: insertErr?.sqlMessage || insertErr?.message })
-    }
-    
-    console.log('✅ 사용자 생성 완료:', { id: result.insertId, email: email.toLowerCase() })
-    return res.status(201).json({
-      id: result.insertId,
-      name,
-      email: email.toLowerCase(),
-      role,
-      isAdmin: isAdmin === 1
-    })
-  } catch (err) {
-    console.error('Signup error:', err)
-    return res.status(500).json({ message: 'Internal server error' })
-=======
         [name, email, passwordHash, role, isAdmin]
       )
     } catch (insertErr) {
@@ -240,7 +172,6 @@ app.post('/auth/signup', async (req, res) => {
   } catch (err) {
     console.error('Signup error:', err)
     return res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
@@ -258,20 +189,6 @@ app.get('/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
   }
 })
 
-<<<<<<< HEAD
-// Admin: block/unblock user
-app.patch('/users/:id/block', authMiddleware, adminMiddleware, async (req, res) => {
-  const userId = Number(req.params.id)
-  try {
-    await pool.execute(
-      'UPDATE users SET is_blocked = 1 WHERE id = ?',
-      [userId]
-    )
-    res.json({ id: userId, is_blocked: 1 })
-  } catch (err) {
-    console.error('Block user error:', err)
-    res.status(500).json({ message: 'Internal server error' })
-=======
 app.get('/admin/products', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.execute(
@@ -413,23 +330,11 @@ app.patch('/users/:id/block', authMiddleware, adminMiddleware, async (req, res) 
   } catch (err) {
     console.error('Block user error:', err)
     res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
 app.patch('/users/:id/unblock', authMiddleware, adminMiddleware, async (req, res) => {
   const userId = Number(req.params.id)
-<<<<<<< HEAD
-  try {
-    await pool.execute(
-      'UPDATE users SET is_blocked = 0 WHERE id = ?',
-      [userId]
-    )
-    res.json({ id: userId, is_blocked: 0 })
-  } catch (err) {
-    console.error('Unblock user error:', err)
-    res.status(500).json({ message: 'Internal server error' })
-=======
   if (!Number.isFinite(userId)) return res.status(400).json({ message: 'Invalid user id' })
   try {
     const result = await setUserBlock(userId, false)
@@ -484,16 +389,10 @@ app.patch('/admin/users/:id/role', authMiddleware, adminMiddleware, async (req, 
   } catch (err) {
     console.error('Admin role update error:', err)
     res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
 app.post('/auth/login', async (req, res) => {
-<<<<<<< HEAD
-  const { email, password } = req.body || {}
-  if (!email || !password) {
-    return res.status(400).json({ message: 'email and password are required' })
-=======
   const email = normalizeEmail(req.body?.email || '')
   const password = (req.body?.password || '').trim()
   if (!email || !password) {
@@ -501,16 +400,11 @@ app.post('/auth/login', async (req, res) => {
   }
   if (!validateEmail(email)) {
     return res.status(400).json({ message: '올바른 이메일 형식을 입력하세요.' })
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
   try {
     const [users] = await pool.execute(
       'SELECT id, name, email, password_hash, role, is_admin, is_blocked FROM users WHERE email = ?',
-<<<<<<< HEAD
-      [email.toLowerCase()]
-=======
       [email]
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     )
     if (users.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -526,11 +420,7 @@ app.post('/auth/login', async (req, res) => {
       return res.status(403).json({ message: 'Blocked user' })
     }
     
-<<<<<<< HEAD
-    const role = user.is_admin === 1 || user.role === 'admin' ? 'admin' : 'user'
-=======
     const role = resolveRole(user)
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     const token = generateToken(user)
     
     return res.json({
@@ -551,11 +441,7 @@ app.post('/auth/login', async (req, res) => {
 
 app.get('/auth/me', authMiddleware, (req, res) => {
   const u = req.user
-<<<<<<< HEAD
-  const role = u.is_admin === 1 || u.role === 'admin' ? 'admin' : 'user'
-=======
   const role = resolveRole(u)
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   return res.json({
     id: u.id,
     name: u.name,

@@ -7,16 +7,6 @@ async function request(path, { method = 'GET', body, token } = {}) {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
-<<<<<<< HEAD
-    credentials: 'include',
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(text || `Request failed: ${res.status}`);
-  }
-  const contentType = res.headers.get('content-type') || '';
-  return contentType.includes('application/json') ? res.json() : res.text();
-=======
     credentials: 'include'
   });
   const contentType = res.headers.get('content-type') || '';
@@ -39,7 +29,6 @@ async function request(path, { method = 'GET', body, token } = {}) {
   }
 
   return isJson ? res.json() : res.text();
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 }
 
 export const api = {
@@ -52,8 +41,6 @@ export const api = {
   listProductReviews: (slug) => request(`/products/${encodeURIComponent(slug)}/reviews`),
   listProducts: (category) => request(`/products${category ? `?category=${encodeURIComponent(category)}` : ''}`),
   getProduct: (slug) => request(`/products/${encodeURIComponent(slug)}`),
-<<<<<<< HEAD
-=======
   admin: {
     listUsers: (token) => request('/admin/users', { token }),
     setUserBlocked: (token, userId, isBlocked) =>
@@ -86,7 +73,6 @@ export const api = {
         body: { isActive }
       })
   }
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 };
 
 export default api;

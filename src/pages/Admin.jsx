@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react'
-import './Admin.css'
-import { api } from '../lib/api'
-
-=======
 import React, { useState, useEffect, useRef } from 'react'
 import './Admin.css'
 import { api } from '../lib/api'
@@ -17,20 +11,12 @@ const formatDate = (value) => {
   }
 }
 
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('users')
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
   const [reviews, setReviews] = useState([])
   const [posts, setPosts] = useState([])
-<<<<<<< HEAD
-
-  useEffect(() => {
-    // 관리자 권한 체크
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-    if (!userInfo.isAdmin) {
-=======
   const [status, setStatus] = useState({ loading: true, error: '' })
   const [currentAdminId, setCurrentAdminId] = useState(null)
   const tokenRef = useRef('')
@@ -39,81 +25,10 @@ const Admin = () => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
     const token = localStorage.getItem('authToken') || ''
     if (!userInfo?.isAdmin || !token) {
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
       alert('관리자 권한이 필요합니다.')
       window.location.href = '/'
       return
     }
-<<<<<<< HEAD
-
-    // 실제 데이터 로드
-    loadInitialData()
-  }, [])
-
-  const loadInitialData = async () => {
-    try {
-      // 사용자 목록
-      const token = localStorage.getItem('authToken') || ''
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const usersList = await res.json()
-      const normalizedUsers = (usersList || []).map(u => ({
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        isAdmin: u.is_admin === 1,
-        isBlocked: u.is_blocked === 1,
-        joinDate: (u.created_at || '').slice(0, 10)
-      }))
-      setUsers(normalizedUsers)
-      // 상품 목록 (간단히)
-      const productsList = await api.listProducts()
-      const normalizedProducts = (productsList || []).map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price_cents || 0,
-        category: p.category,
-        isActive: p.is_active === 1 || p.is_active === true
-      }))
-      setProducts(normalizedProducts)
-    } catch {
-      // 무시
-    }
-  }
-
-  const toggleUserBlock = (userId) => {
-    const token = localStorage.getItem('authToken') || ''
-    const user = users.find(u => u.id === userId)
-    if (!user) return
-    const endpoint = user.isBlocked ? `/users/${userId}/unblock` : `/users/${userId}/block`
-    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}${endpoint}`, {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setUsers(users.map(u => u.id === userId ? { ...u, isBlocked: !u.isBlocked } : u))
-      })
-      .catch(() => {
-        alert('처리 실패했습니다.')
-      })
-  }
-
-  const toggleProductStatus = (productId) => {
-    setProducts(products.map(product => 
-      product.id === productId ? { ...product, isActive: !product.isActive } : product
-    ))
-  }
-
-  const deleteReview = (reviewId) => {
-    setReviews(reviews.filter(review => review.id !== reviewId))
-  }
-
-  const togglePostStatus = (postId) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? { ...post, isActive: !post.isActive } : post
-    ))
-=======
     tokenRef.current = token
     setCurrentAdminId(userInfo.id || null)
     loadInitialData(token)
@@ -258,7 +173,6 @@ const Admin = () => {
     } catch (err) {
       alert(err?.message || '게시글 상태 변경에 실패했습니다.')
     }
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 
   const renderUsersTab = () => (
@@ -274,12 +188,8 @@ const Admin = () => {
               <th>권한</th>
               <th>상태</th>
               <th>가입일</th>
-<<<<<<< HEAD
-              <th>액션</th>
-=======
               <th>권한 관리</th>
               <th>차단</th>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
             </tr>
           </thead>
           <tbody>
@@ -300,13 +210,6 @@ const Admin = () => {
                 </td>
                 <td>{user.joinDate}</td>
                 <td>
-<<<<<<< HEAD
-                  <button 
-                    className={`btn ${user.isBlocked ? 'btn-secondary' : 'btn-danger'}`}
-                    onClick={() => toggleUserBlock(user.id)}
-                  >
-                    {user.isBlocked ? '차단해제' : '차단'}
-=======
                   <button
                     className="btn btn-secondary"
                     disabled={user.id === currentAdminId && user.isAdmin}
@@ -321,7 +224,6 @@ const Admin = () => {
                     onClick={() => handleUserBlockToggle(user.id)}
                   >
                     {user.isBlocked ? '차단 해제' : '차단'}
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                   </button>
                 </td>
               </tr>
@@ -341,16 +243,10 @@ const Admin = () => {
             <tr>
               <th>ID</th>
               <th>상품명</th>
-<<<<<<< HEAD
-              <th>가격</th>
-              <th>카테고리</th>
-              <th>상태</th>
-=======
               <th>카테고리</th>
               <th>가격</th>
               <th>상태</th>
               <th>등록일</th>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
               <th>액션</th>
             </tr>
           </thead>
@@ -359,26 +255,16 @@ const Admin = () => {
               <tr key={product.id}>
                 <td>{product.id}</td>
                 <td>{product.name}</td>
-<<<<<<< HEAD
-                <td>{product.price.toLocaleString()}원</td>
-                <td>{product.category}</td>
-=======
                 <td>{product.category}</td>
                 <td>{product.price.toLocaleString()}원</td>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                 <td>
                   <span className={`badge ${product.isActive ? 'active' : 'inactive'}`}>
                     {product.isActive ? '활성' : '비활성'}
                   </span>
                 </td>
-<<<<<<< HEAD
-                <td>
-                  <button 
-=======
                 <td>{formatDate(product.createdAt)}</td>
                 <td>
                   <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                     className={`btn ${product.isActive ? 'btn-danger' : 'btn-secondary'}`}
                     onClick={() => toggleProductStatus(product.id)}
                   >
@@ -401,21 +287,12 @@ const Admin = () => {
           <thead>
             <tr>
               <th>ID</th>
-<<<<<<< HEAD
-              <th>상품ID</th>
-              <th>사용자</th>
-              <th>평점</th>
-              <th>댓글</th>
-              <th>신고</th>
-              <th>날짜</th>
-=======
               <th>상품</th>
               <th>사용자</th>
               <th>평점</th>
               <th>내용</th>
               <th>상태</th>
               <th>작성일</th>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
               <th>액션</th>
             </tr>
           </thead>
@@ -423,17 +300,6 @@ const Admin = () => {
             {reviews.map(review => (
               <tr key={review.id}>
                 <td>{review.id}</td>
-<<<<<<< HEAD
-                <td>{review.productId}</td>
-                <td>{review.userName}</td>
-                <td>
-                  <span className="rating">⭐ {review.rating}</span>
-                </td>
-                <td className="comment-cell">{review.comment}</td>
-                <td>
-                  <span className={`badge ${review.isReported ? 'reported' : 'normal'}`}>
-                    {review.isReported ? '신고됨' : '정상'}
-=======
                 <td>{review.productName}</td>
                 <td>
                   {review.userName}
@@ -447,19 +313,11 @@ const Admin = () => {
                 <td>
                   <span className={`badge ${review.isActive ? 'active' : 'inactive'}`}>
                     {review.isActive ? '활성' : '비활성'}
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                   </span>
                 </td>
                 <td>{review.date}</td>
                 <td>
-<<<<<<< HEAD
-                  <button 
-                    className="btn btn-danger"
-                    onClick={() => deleteReview(review.id)}
-                  >
-=======
                   <button className="btn btn-danger" onClick={() => deleteReview(review.id)}>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                     삭제
                   </button>
                 </td>
@@ -481,15 +339,8 @@ const Admin = () => {
               <th>ID</th>
               <th>제목</th>
               <th>작성자</th>
-<<<<<<< HEAD
-              <th>카테고리</th>
-              <th>조회수</th>
-              <th>상태</th>
-              <th>날짜</th>
-=======
               <th>상태</th>
               <th>작성일</th>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
               <th>액션</th>
             </tr>
           </thead>
@@ -498,17 +349,11 @@ const Admin = () => {
               <tr key={post.id}>
                 <td>{post.id}</td>
                 <td>{post.title}</td>
-<<<<<<< HEAD
-                <td>{post.author}</td>
-                <td>{post.category}</td>
-                <td>{post.views}</td>
-=======
                 <td>
                   {post.authorName}
                   <br />
                   <span className="muted">{post.authorEmail}</span>
                 </td>
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                 <td>
                   <span className={`badge ${post.isActive ? 'active' : 'inactive'}`}>
                     {post.isActive ? '활성' : '비활성'}
@@ -516,11 +361,7 @@ const Admin = () => {
                 </td>
                 <td>{post.date}</td>
                 <td>
-<<<<<<< HEAD
-                  <button 
-=======
                   <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
                     className={`btn ${post.isActive ? 'btn-danger' : 'btn-secondary'}`}
                     onClick={() => togglePostStatus(post.id)}
                   >
@@ -540,12 +381,6 @@ const Admin = () => {
       <div className="admin-header">
         <h1>🔧 관리자 페이지</h1>
         <p>DevShop 관리자 도구</p>
-<<<<<<< HEAD
-      </div>
-
-      <div className="admin-tabs">
-        <button 
-=======
         <button className="btn btn-secondary" onClick={() => loadInitialData()}>
           새로고침
         </button>
@@ -555,37 +390,24 @@ const Admin = () => {
 
       <div className="admin-tabs">
         <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           회원 관리
         </button>
-<<<<<<< HEAD
-        <button 
-=======
         <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
           className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
           onClick={() => setActiveTab('products')}
         >
           상품 관리
         </button>
-<<<<<<< HEAD
-        <button 
-=======
         <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
           className={`tab-btn ${activeTab === 'reviews' ? 'active' : ''}`}
           onClick={() => setActiveTab('reviews')}
         >
           리뷰 관리
         </button>
-<<<<<<< HEAD
-        <button 
-=======
         <button
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
           className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
           onClick={() => setActiveTab('posts')}
         >
@@ -594,12 +416,6 @@ const Admin = () => {
       </div>
 
       <div className="admin-main">
-<<<<<<< HEAD
-        {activeTab === 'users' && renderUsersTab()}
-        {activeTab === 'products' && renderProductsTab()}
-        {activeTab === 'reviews' && renderReviewsTab()}
-        {activeTab === 'posts' && renderPostsTab()}
-=======
         {status.loading ? (
           <div className="admin-loading">데이터를 불러오는 중...</div>
         ) : (
@@ -610,7 +426,6 @@ const Admin = () => {
             {activeTab === 'posts' && renderPostsTab()}
           </>
         )}
->>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
       </div>
     </div>
   )
