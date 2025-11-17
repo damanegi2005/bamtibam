@@ -4,17 +4,56 @@ import morgan from 'morgan'
 import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+<<<<<<< HEAD
 import pool from './db.js'
 
 dotenv.config()
 
+=======
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
+import pool from './db.js'
+import {
+  validateSignupPayload,
+  passwordPolicyText,
+  normalizeEmail,
+  validateEmail
+} from './validators.js'
+
+dotenv.config()
+
+const ADMIN_ROLE = 'admin'
+const CUSTOMER_ROLE = 'customer'
+
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 const app = express()
 const PORT = process.env.PORT || 4000
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
 const JWT_SECRET = process.env.JWT_SECRET || 'devsecret_change_me'
+<<<<<<< HEAD
 
 app.use(morgan('dev'))
 app.use(express.json())
+=======
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12)
+
+const authLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: '잠시 후 다시 시도해 주세요.' }
+})
+
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+)
+app.use(morgan('dev'))
+app.use(express.json({ limit: '1mb' }))
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 app.use(
   cors({
     origin: CLIENT_ORIGIN,
@@ -22,9 +61,20 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization']
   })
 )
+<<<<<<< HEAD
 
 function generateToken(user) {
   const role = user.is_admin === 1 || user.role === 'admin' ? 'admin' : 'user'
+=======
+app.use(['/auth/login', '/auth/signup'], authLimiter)
+
+function resolveRole(user) {
+  return user.is_admin === 1 || user.role === ADMIN_ROLE ? ADMIN_ROLE : CUSTOMER_ROLE
+}
+
+function generateToken(user) {
+  const role = resolveRole(user)
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   return jwt.sign(
     { sub: user.id, email: user.email, role },
     JWT_SECRET,
@@ -54,11 +104,16 @@ async function authMiddleware(req, res, next) {
 
 function adminMiddleware(req, res, next) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
+<<<<<<< HEAD
   const isAdmin = req.user.is_admin === 1 || req.user.role === 'admin'
+=======
+  const isAdmin = resolveRole(req.user) === ADMIN_ROLE
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   if (!isAdmin) return res.status(403).json({ message: 'Forbidden' })
   next()
 }
 
+<<<<<<< HEAD
 // Auth
 app.post('/auth/signup', async (req, res) => {
   const { name, email, password } = req.body || {}
@@ -81,10 +136,69 @@ app.post('/auth/signup', async (req, res) => {
     const isAdmin = req.body.isAdmin === true ? 1 : 0
     const role = isAdmin ? 'admin' : 'customer'
     
+=======
+async function updateUserBlockStatus(userId, isBlocked) {
+  await pool.execute('UPDATE users SET is_blocked = ? WHERE id = ?', [isBlocked ? 1 : 0, userId])
+}
+
+async function setUserBlock(userId, isBlocked) {
+  await ensureUserExists(userId)
+  await updateUserBlockStatus(userId, isBlocked)
+  return { id: userId, is_blocked: isBlocked ? 1 : 0 }
+}
+
+async function ensureUserExists(userId) {
+  const [users] = await pool.execute(
+    'SELECT id, name, email, role, is_admin, is_blocked FROM users WHERE id = ?',
+    [userId]
+  )
+  if (users.length === 0) {
+    throw Object.assign(new Error('User not found'), { status: 404 })
+  }
+  return users[0]
+}
+
+async function assertLastAdminRemains(targetUserId) {
+  const [[{ admin_count }]] = await pool.query(
+    'SELECT COUNT(*) AS admin_count FROM users WHERE is_admin = 1'
+  )
+  if (admin_count <= 1) {
+    const target = await ensureUserExists(targetUserId)
+    if (target.is_admin === 1) {
+      throw Object.assign(
+        new Error('최소 1명의 관리자 계정은 유지되어야 합니다.'),
+        { status: 400 }
+      )
+    }
+  }
+}
+
+// Auth
+app.post('/auth/signup', async (req, res) => {
+  try {
+    const validation = validateSignupPayload(req.body || {})
+    if (!validation.ok) {
+      return res.status(400).json({ message: validation.message })
+    }
+    const { name, email, password } = validation.data
+    console.log('↪️ /auth/signup 요청:', { name, email })
+
+    const [existing] = await pool.execute('SELECT id FROM users WHERE email = ?', [email])
+    if (existing.length > 0) {
+      console.log('⚠️ 이미 존재하는 이메일:', email)
+      return res.status(409).json({ message: '이미 가입된 이메일입니다.' })
+    }
+
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS)
+    const role = CUSTOMER_ROLE
+    const isAdmin = 0
+
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     let result
     try {
       ;[result] = await pool.execute(
         'INSERT INTO users (name, email, password_hash, role, is_admin) VALUES (?, ?, ?, ?, ?)',
+<<<<<<< HEAD
         [name, email.toLowerCase(), passwordHash, role, isAdmin]
       )
     } catch (insertErr) {
@@ -103,6 +217,30 @@ app.post('/auth/signup', async (req, res) => {
   } catch (err) {
     console.error('Signup error:', err)
     return res.status(500).json({ message: 'Internal server error' })
+=======
+        [name, email, passwordHash, role, isAdmin]
+      )
+    } catch (insertErr) {
+      console.error('❌ 사용자 INSERT 실패:', insertErr?.sqlMessage || insertErr?.message || insertErr)
+      return res.status(500).json({
+        message: '회원가입에 실패했습니다.',
+        detail: insertErr?.sqlMessage || insertErr?.message
+      })
+    }
+
+    console.log('✅ 사용자 생성 완료:', { id: result.insertId, email })
+    return res.status(201).json({
+      id: result.insertId,
+      name,
+      email,
+      role,
+      isAdmin: false,
+      passwordPolicy: passwordPolicyText
+    })
+  } catch (err) {
+    console.error('Signup error:', err)
+    return res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
@@ -120,6 +258,7 @@ app.get('/admin/users', authMiddleware, adminMiddleware, async (req, res) => {
   }
 })
 
+<<<<<<< HEAD
 // Admin: block/unblock user
 app.patch('/users/:id/block', authMiddleware, adminMiddleware, async (req, res) => {
   const userId = Number(req.params.id)
@@ -132,11 +271,155 @@ app.patch('/users/:id/block', authMiddleware, adminMiddleware, async (req, res) 
   } catch (err) {
     console.error('Block user error:', err)
     res.status(500).json({ message: 'Internal server error' })
+=======
+app.get('/admin/products', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT 
+        p.id,
+        p.name,
+        p.slug,
+        p.price_cents,
+        p.is_active,
+        p.created_at,
+        c.slug AS category,
+        c.name AS category_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.id
+      ORDER BY p.created_at DESC`
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error('Admin products error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+app.patch('/admin/products/:id/status', authMiddleware, adminMiddleware, async (req, res) => {
+  const productId = Number(req.params.id)
+  if (!Number.isFinite(productId)) return res.status(400).json({ message: 'Invalid product id' })
+  const { isActive } = req.body || {}
+  if (typeof isActive !== 'boolean') {
+    return res.status(400).json({ message: 'isActive(boolean)을 전달하세요.' })
+  }
+  try {
+    const [result] = await pool.execute(
+      'UPDATE products SET is_active = ? WHERE id = ?',
+      [isActive ? 1 : 0, productId]
+    )
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Product not found' })
+    }
+    res.json({ id: productId, is_active: isActive ? 1 : 0 })
+  } catch (err) {
+    console.error('Admin product status error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+app.get('/admin/reviews', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT 
+        r.id,
+        r.product_id,
+        p.name AS product_name,
+        u.name AS user_name,
+        u.email AS user_email,
+        r.rating,
+        r.content,
+        r.is_active,
+        r.created_at
+      FROM reviews r
+      JOIN products p ON r.product_id = p.id
+      JOIN users u ON r.user_id = u.id
+      ORDER BY r.created_at DESC`
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error('Admin reviews error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+app.delete('/admin/reviews/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  const reviewId = Number(req.params.id)
+  if (!Number.isFinite(reviewId)) return res.status(400).json({ message: 'Invalid review id' })
+  try {
+    const [result] = await pool.execute(
+      'UPDATE reviews SET is_active = 0 WHERE id = ?',
+      [reviewId]
+    )
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Review not found' })
+    }
+    res.json({ id: reviewId, is_active: 0 })
+  } catch (err) {
+    console.error('Admin review delete error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+app.get('/admin/posts', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT 
+        p.id,
+        p.title,
+        p.is_active,
+        p.created_at,
+        u.name AS author_name,
+        u.email AS author_email
+      FROM posts p
+      JOIN users u ON p.user_id = u.id
+      ORDER BY p.created_at DESC`
+    )
+    res.json(rows)
+  } catch (err) {
+    console.error('Admin posts error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+app.patch('/admin/posts/:id/status', authMiddleware, adminMiddleware, async (req, res) => {
+  const postId = Number(req.params.id)
+  if (!Number.isFinite(postId)) return res.status(400).json({ message: 'Invalid post id' })
+  const { isActive } = req.body || {}
+  if (typeof isActive !== 'boolean') {
+    return res.status(400).json({ message: 'isActive(boolean)을 전달하세요.' })
+  }
+  try {
+    const [result] = await pool.execute(
+      'UPDATE posts SET is_active = ? WHERE id = ?',
+      [isActive ? 1 : 0, postId]
+    )
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Post not found' })
+    }
+    res.json({ id: postId, is_active: isActive ? 1 : 0 })
+  } catch (err) {
+    console.error('Admin post status error:', err)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+})
+
+// Admin: block/unblock user
+app.patch('/users/:id/block', authMiddleware, adminMiddleware, async (req, res) => {
+  const userId = Number(req.params.id)
+  if (!Number.isFinite(userId)) return res.status(400).json({ message: 'Invalid user id' })
+  try {
+    const result = await setUserBlock(userId, true)
+    res.json(result)
+  } catch (err) {
+    console.error('Block user error:', err)
+    res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
 app.patch('/users/:id/unblock', authMiddleware, adminMiddleware, async (req, res) => {
   const userId = Number(req.params.id)
+<<<<<<< HEAD
   try {
     await pool.execute(
       'UPDATE users SET is_blocked = 0 WHERE id = ?',
@@ -146,18 +429,88 @@ app.patch('/users/:id/unblock', authMiddleware, adminMiddleware, async (req, res
   } catch (err) {
     console.error('Unblock user error:', err)
     res.status(500).json({ message: 'Internal server error' })
+=======
+  if (!Number.isFinite(userId)) return res.status(400).json({ message: 'Invalid user id' })
+  try {
+    const result = await setUserBlock(userId, false)
+    res.json(result)
+  } catch (err) {
+    console.error('Unblock user error:', err)
+    res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
+  }
+})
+
+app.patch('/admin/users/:id/block', authMiddleware, adminMiddleware, async (req, res) => {
+  const userId = Number(req.params.id)
+  if (!Number.isFinite(userId)) return res.status(400).json({ message: 'Invalid user id' })
+  const desired = req.body?.isBlocked
+  if (typeof desired !== 'boolean') {
+    return res.status(400).json({ message: 'isBlocked(boolean)을 전달하세요.' })
+  }
+  try {
+    const result = await setUserBlock(userId, desired)
+    res.json(result)
+  } catch (err) {
+    console.error('Admin block toggle error:', err)
+    res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
+  }
+})
+
+app.patch('/admin/users/:id/role', authMiddleware, adminMiddleware, async (req, res) => {
+  const userId = Number(req.params.id)
+  if (!Number.isFinite(userId)) return res.status(400).json({ message: 'Invalid user id' })
+  const requestedRole = req.body?.role === ADMIN_ROLE ? ADMIN_ROLE : CUSTOMER_ROLE
+  const nextIsAdmin = requestedRole === ADMIN_ROLE ? 1 : 0
+
+  if (userId === req.user.id && nextIsAdmin === 0) {
+    return res.status(400).json({ message: '본인 권한은 다른 관리자가 해제해야 합니다.' })
+  }
+
+  try {
+    if (nextIsAdmin === 0) {
+      await assertLastAdminRemains(userId)
+    } else {
+      await ensureUserExists(userId)
+    }
+
+    const [result] = await pool.execute(
+      'UPDATE users SET role = ?, is_admin = ? WHERE id = ?',
+      [requestedRole, nextIsAdmin, userId]
+    )
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    res.json({ id: userId, role: requestedRole, is_admin: nextIsAdmin })
+  } catch (err) {
+    console.error('Admin role update error:', err)
+    res.status(err?.status || 500).json({ message: err?.message || 'Internal server error' })
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
 })
 
 app.post('/auth/login', async (req, res) => {
+<<<<<<< HEAD
   const { email, password } = req.body || {}
   if (!email || !password) {
     return res.status(400).json({ message: 'email and password are required' })
+=======
+  const email = normalizeEmail(req.body?.email || '')
+  const password = (req.body?.password || '').trim()
+  if (!email || !password) {
+    return res.status(400).json({ message: '이메일과 비밀번호를 입력하세요.' })
+  }
+  if (!validateEmail(email)) {
+    return res.status(400).json({ message: '올바른 이메일 형식을 입력하세요.' })
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   }
   try {
     const [users] = await pool.execute(
       'SELECT id, name, email, password_hash, role, is_admin, is_blocked FROM users WHERE email = ?',
+<<<<<<< HEAD
       [email.toLowerCase()]
+=======
+      [email]
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     )
     if (users.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' })
@@ -173,7 +526,11 @@ app.post('/auth/login', async (req, res) => {
       return res.status(403).json({ message: 'Blocked user' })
     }
     
+<<<<<<< HEAD
     const role = user.is_admin === 1 || user.role === 'admin' ? 'admin' : 'user'
+=======
+    const role = resolveRole(user)
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
     const token = generateToken(user)
     
     return res.json({
@@ -194,7 +551,11 @@ app.post('/auth/login', async (req, res) => {
 
 app.get('/auth/me', authMiddleware, (req, res) => {
   const u = req.user
+<<<<<<< HEAD
   const role = u.is_admin === 1 || u.role === 'admin' ? 'admin' : 'user'
+=======
+  const role = resolveRole(u)
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
   return res.json({
     id: u.id,
     name: u.name,

@@ -7,6 +7,7 @@ async function request(path, { method = 'GET', body, token } = {}) {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+<<<<<<< HEAD
     credentials: 'include',
   });
   if (!res.ok) {
@@ -15,6 +16,30 @@ async function request(path, { method = 'GET', body, token } = {}) {
   }
   const contentType = res.headers.get('content-type') || '';
   return contentType.includes('application/json') ? res.json() : res.text();
+=======
+    credentials: 'include'
+  });
+  const contentType = res.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+
+  if (!res.ok) {
+    let message = `Request failed: ${res.status}`;
+    let payload = null;
+    if (isJson) {
+      payload = await res.json().catch(() => null);
+      if (payload?.message) message = payload.message;
+    } else {
+      const text = await res.text().catch(() => '');
+      if (text) message = text;
+    }
+    const error = new Error(message);
+    error.status = res.status;
+    if (payload?.detail) error.detail = payload.detail;
+    throw error;
+  }
+
+  return isJson ? res.json() : res.text();
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 }
 
 export const api = {
@@ -27,6 +52,41 @@ export const api = {
   listProductReviews: (slug) => request(`/products/${encodeURIComponent(slug)}/reviews`),
   listProducts: (category) => request(`/products${category ? `?category=${encodeURIComponent(category)}` : ''}`),
   getProduct: (slug) => request(`/products/${encodeURIComponent(slug)}`),
+<<<<<<< HEAD
+=======
+  admin: {
+    listUsers: (token) => request('/admin/users', { token }),
+    setUserBlocked: (token, userId, isBlocked) =>
+      request(`/admin/users/${userId}/block`, {
+        method: 'PATCH',
+        token,
+        body: { isBlocked }
+      }),
+    setUserRole: (token, userId, role) =>
+      request(`/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        token,
+        body: { role }
+      }),
+    listProducts: (token) => request('/admin/products', { token }),
+    setProductStatus: (token, productId, isActive) =>
+      request(`/admin/products/${productId}/status`, {
+        method: 'PATCH',
+        token,
+        body: { isActive }
+      }),
+    listReviews: (token) => request('/admin/reviews', { token }),
+    deleteReview: (token, reviewId) =>
+      request(`/admin/reviews/${reviewId}`, { method: 'DELETE', token }),
+    listPosts: (token) => request('/admin/posts', { token }),
+    setPostStatus: (token, postId, isActive) =>
+      request(`/admin/posts/${postId}/status`, {
+        method: 'PATCH',
+        token,
+        body: { isActive }
+      })
+  }
+>>>>>>> 626638b (feat: secure auth flow and admin dashboard integration)
 };
 
 export default api;
