@@ -31,6 +31,18 @@ const Layout = ({ children }) => {
                 >
                   상품
                 </Link>
+                <Link 
+                  to="/cart" 
+                  className={location.pathname === '/cart' ? 'nav-link active' : 'nav-link'}
+                >
+                  장바구니
+                </Link>
+                <Link 
+                  to="/mypage" 
+                  className={location.pathname === '/mypage' ? 'nav-link active' : 'nav-link'}
+                >
+                  마이페이지
+                </Link>
                 {isAdmin && (
                   <Link 
                     to="/admin" 
@@ -41,9 +53,6 @@ const Layout = ({ children }) => {
                 )}
                 <div className="user-info">
                   <span className="user-name">안녕하세요, {userInfo.name}님!</span>
-                  {isAdmin && (
-                    <Link to="/admin" className="admin-link">관리자</Link>
-                  )}
                   <button onClick={handleLogout} className="logout-btn">
                     로그아웃
                   </button>

@@ -56,8 +56,25 @@ const ProductModal = ({ product, onClose }) => {
     }
   }
 
-  const handlePurchase = () => {
-    alert('구매 기능은 백엔드와 연동 후 구현됩니다.')
+  const handlePurchase = async () => {
+    const token = localStorage.getItem('authToken') || ''
+    if (!token) {
+      alert('로그인이 필요합니다.')
+      return
+    }
+    
+    // 비활성화된 상품은 구매 불가
+    if (product.is_active === false) {
+      alert('품절된 상품입니다.')
+      return
+    }
+    
+    try {
+      await api.addToCart(token, { productId: product.id, quantity: 1 })
+      alert('장바구니에 담겼습니다!')
+    } catch (err) {
+      alert(err?.message || '장바구니 추가에 실패했습니다.')
+    }
   }
 
   const averageRating = reviews.length > 0 
@@ -101,9 +118,15 @@ const ProductModal = ({ product, onClose }) => {
                 <p>{product.description}</p>
               </div>
               
-              <button className="btn btn-primary purchase-btn" onClick={handlePurchase}>
-                구매하기
-              </button>
+              {product.is_active === false ? (
+                <button className="btn btn-secondary purchase-btn" disabled>
+                  품절
+                </button>
+              ) : (
+                <button className="btn btn-primary purchase-btn" onClick={handlePurchase}>
+                  구매하기
+                </button>
+              )}
             </div>
           </div>
 

@@ -72,40 +72,6 @@
   border-top: 2px solid var(--accent-neon);
 }
 
-.form-error {
-  margin-top: 10px;
-  color: #ff6b81;
-  font-size: 13px;
-  background: rgba(255, 71, 87, 0.1);
-  border: 1px solid rgba(255, 71, 87, 0.4);
-  border-radius: 6px;
-  padding: 10px;
-}
-
-.password-hint {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px dashed var(--accent-neon);
-  border-radius: 8px;
-  background: rgba(0, 255, 136, 0.05);
-}
-
-.password-hint p {
-  margin: 0 0 8px;
-  color: var(--text-primary);
-  font-size: 13px;
-}
-
-.password-hint ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .auth-footer p {
   color: var(--text-secondary);
   margin-bottom: 8px;

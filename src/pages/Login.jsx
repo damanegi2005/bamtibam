@@ -79,6 +79,9 @@ const Login = () => {
           <p style={{ fontSize: '12px', marginTop: '10px', color: 'var(--text-secondary)' }}>
             서버 연동 로그인: 가입한 이메일/비밀번호를 사용하세요.
           </p>
+          <p style={{ fontSize: '12px', marginTop: '10px', color: '#ff6b6b' }}>
+            ⚠️ 비밀번호를 잊으셨다면 관리자에게 연락하여 계정 삭제를 요청해주세요.
+          </p>
         </div>
       </div>
     </div>

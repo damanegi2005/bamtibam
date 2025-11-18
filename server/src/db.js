@@ -28,7 +28,13 @@ const pool = mysql.createPool({
   ...config,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+09:00' // 한국 시간대 설정
+})
+
+// 연결 시 timezone 설정
+pool.on('connection', (connection) => {
+  connection.query("SET time_zone = '+09:00'")
 })
 
 // Test connection

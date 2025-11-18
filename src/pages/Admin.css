@@ -11,10 +11,6 @@
   border-bottom: 2px solid var(--accent-neon);
 }
 
-.admin-header .btn {
-  margin-top: 15px;
-}
-
 .admin-header h1 {
   color: var(--accent-neon);
   font-size: 32px;
@@ -75,27 +71,6 @@
   color: var(--accent-neon);
   margin-bottom: 25px;
   font-size: 24px;
-}
-
-.admin-alert {
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  background: rgba(255, 71, 87, 0.1);
-  border: 1px solid #ff4757;
-  color: #ff6b81;
-}
-
-.admin-loading {
-  padding: 40px;
-  text-align: center;
-  color: var(--text-secondary);
-}
-
-.muted {
-  color: var(--text-secondary);
-  font-size: 12px;
 }
 
 .admin-table-container {

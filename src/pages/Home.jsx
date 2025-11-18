@@ -99,7 +99,8 @@ const Home = () => {
           category: p.category || currentCategory,
           image: p.image || `https://via.placeholder.com/300x200/00aa88/1e1e1e?text=${encodeURIComponent(p.name)}`,
           description: p.description || '',
-          slug: p.slug
+          slug: p.slug,
+          is_active: p.is_active !== undefined ? p.is_active : true
         }))
         setProducts(normalized)
       } catch (err) {
@@ -187,16 +188,24 @@ const Home = () => {
         {products.map(product => (
           <div 
             key={product.id} 
-            className="product-card"
+            className={`product-card ${product.is_active === false ? 'product-soldout' : ''}`}
             onClick={() => handleProductClick(product)}
           >
             <div className="product-image">
               <img src={product.image || 'https://via.placeholder.com/300x200'} alt={product.name} />
+              {product.is_active === false && (
+                <div className="soldout-overlay">
+                  <span className="soldout-text">품절</span>
+                </div>
+              )}
             </div>
             <div className="product-info">
               <h3>{product.name}</h3>
               <p className="product-price">{(product.price_cents || product.price || 0).toLocaleString()}원</p>
               <p className="product-description">{product.description}</p>
+              {product.is_active === false && (
+                <p className="soldout-badge">품절</p>
+              )}
             </div>
           </div>
         ))}
