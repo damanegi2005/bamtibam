@@ -36,7 +36,7 @@ const Signup = () => {
     
     setNameCheckStatus('checking')
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/auth/check-name?name=${encodeURIComponent(name)}`)
+      const res = await api.checkNameDuplicate(name);
       const data = await response.json()
       
       if (response.ok && data.available) {
