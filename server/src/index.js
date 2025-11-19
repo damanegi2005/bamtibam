@@ -19,7 +19,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   CLIENT_ORIGIN,
   CLIENT_ORIGIN_ALT,
-  "https://damanegi2005.github.io/bamtibam/"
+  "https://damanegi2005.github.io/bamtibam/",
+  "https://damanegi2005.github.io"
 ];
 
 app.use(morgan('dev'))
