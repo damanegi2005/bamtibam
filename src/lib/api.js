@@ -1,4 +1,4 @@
-const API_BASE_URL = window.API_BASE_URL || "https://bamtibam-server.onrender.com";
+const API_BASE_URL = "https://bamtibam-server.onrender.com";
 
 async function request(path, { method = 'GET', body, token } = {}) {
   const headers = { 'Content-Type': 'application/json' };
