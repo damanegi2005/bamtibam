@@ -33,13 +33,13 @@ const Signup = () => {
       alert('이름을 입력하세요.')
       return
     }
-    
+  
     setNameCheckStatus('checking')
     try {
+      // api가 이미 JSON 파싱된 값 반환함
       const res = await api.checkNameDuplicate(name);
-      const data = await response.json()
-      
-      if (response.ok && data.available) {
+  
+      if (res.available) {
         setNameCheckStatus('available')
         alert('사용 가능한 이름입니다.')
       } else {
@@ -50,7 +50,7 @@ const Signup = () => {
       setNameCheckStatus(null)
       alert('이름 중복 확인 중 오류가 발생했습니다.')
     }
-  }
+  }  
 
   const handleSubmit = async (e) => {
     e.preventDefault()
