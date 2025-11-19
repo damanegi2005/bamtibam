@@ -11,19 +11,32 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 4000
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:3000'
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
+const CLIENT_ORIGIN_ALT = process.env.CLIENT_ORIGIN_ALT;
 const JWT_SECRET = process.env.JWT_SECRET || 'devsecret_change_me'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@devshop.com'
+const allowedOrigins = [
+  "http://localhost:3000",
+  CLIENT_ORIGIN,
+  CLIENT_ORIGIN_ALT
+];
 
 app.use(morgan('dev'))
 app.use(express.json())
 app.use(
   cors({
-    origin: CLIENT_ORIGIN,
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
-  })
-)
+    origin: (origin, callback) => {
+      // 로컬 파일, 서버 내부 요청 등 origin이 없을 때 허용
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"), false);
+      }
+    },
+    credentials: true
+  }))
 
 function generateToken(user) {
   const role = user.is_admin === 1 || user.role === 'admin' ? 'admin' : 'user'
