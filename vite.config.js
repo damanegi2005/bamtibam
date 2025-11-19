@@ -1,12 +1,10 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: "/bamtibam/",
   plugins: [react()],
-  server: {
-    port: 3000,
-    open: true
-  }
-})
-
+  base: "/bamtibam/",      // ★ GitHub Pages 경로
+  build: {
+    outDir: "docs",        // ★ GitHub Pages에 맞춰 docs로 빌드
+  },
+});
