@@ -2,15 +2,28 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>쇼핑몰</title>
-    <script type="module" crossorigin src="/bamtibam/assets/index-4573f757.js"></script>
-    <link rel="stylesheet" href="/bamtibam/assets/index-ee67eb16.css">
+
+    <title>Bamtibam 쇼핑몰</title>
+
+    <!-- 🔥 GitHub Pages + React + Vite 전용: 절대 경로가 아닌 프로젝트 경로로 위주로 설정 -->
+    <script>
+      /* 🔥 Render 백엔드 API 주소 */
+      window.API_BASE_URL = "https://bamtibam-server.onrender.com";
+    </script>
+
+    <!-- 🔥 dist → docs 로 복사된 파일을 정확히 참조 -->
+    <!-- 파일명은 매번 빌드할 때 바뀜 → 현재 최신 빌드 파일명으로 자동 교체해야 함 -->
+    <script type="module" crossorigin src="./assets/index-4fa599a4.js"></script>
+    <link rel="stylesheet" href="./assets/index-ee67eb16.css" />
+
+    <!-- 캐시 무효화를 위한 쿼리 문자열 추가 (GitHub Pages 캐싱 문제 해결) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
   </head>
+
   <body>
     <div id="root"></div>
-    
   </body>
 </html>
-
