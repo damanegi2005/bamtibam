@@ -1,9 +1,10 @@
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import './Layout.css'
 
 const Layout = ({ children }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
   const isAdmin = userInfo.isAdmin || false
@@ -11,7 +12,7 @@ const Layout = ({ children }) => {
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn')
     localStorage.removeItem('userInfo')
-    window.location.href = '/'
+    navigate('/')
   }
 
 

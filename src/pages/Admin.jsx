@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Admin.css'
 import { api } from '../lib/api'
 
 const Admin = () => {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('orders')
   const [users, setUsers] = useState([])
   const [products, setProducts] = useState([])
@@ -14,7 +16,7 @@ const Admin = () => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
     if (!userInfo.isAdmin) {
       alert('관리자 권한이 필요합니다.')
-      window.location.href = '/'
+      navigate('/')
       return
     }
 
